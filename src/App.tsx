@@ -3,19 +3,43 @@ import { loadQuestions } from "./data/loadQuestions";
 import { evaluateLocal } from "./engine/evaluateLocal";
 
 export default function App() {
+  const [questions, setQuestions] = useState<any[]>([]);
   const [question, setQuestion] = useState<any>(null);
   const [userFix, setUserFix] = useState("");
   const [result, setResult] = useState<any>(null);
 
+  // Load all questions once
   useEffect(() => {
-    loadQuestions().then(qs => setQuestion(qs[0]));
+    loadQuestions().then(qs => {
+      setQuestions(qs);
+      pickRandomQuestion(qs);
+    });
   }, []);
 
-  if (!question) return <div style={{ padding: 20 }}>Loading…</div>;
+  function pickRandomQuestion(qs = questions) {
+    if (!qs.length) return;
+
+    let next;
+    do {
+      next = qs[Math.floor(Math.random() * qs.length)];
+    } while (qs.length > 1 && next.id === question?.id);
+
+    setQuestion(next);
+    setUserFix("");
+    setResult(null);
+  }
+
+  if (!question) {
+    return <div style={{ padding: 20 }}>Loading questions…</div>;
+  }
 
   return (
-    <div style={{ maxWidth: 700, margin: "40px auto", fontFamily: "sans-serif" }}>
+    <div style={{ maxWidth: 720, margin: "40px auto", fontFamily: "sans-serif" }}>
       <h2>{question.title}</h2>
+
+      <p style={{ color: "#555" }}>
+        {question.domain} · {question.difficulty}
+      </p>
 
       <h4>Prompt</h4>
       <p>{question.prompt}</p>
@@ -28,7 +52,7 @@ export default function App() {
         value={userFix}
         onChange={e => setUserFix(e.target.value)}
         rows={3}
-        style={{ width: "100%" }}
+        style={{ width: "100%", fontSize: 14 }}
       />
 
       <br /><br />
@@ -44,10 +68,28 @@ export default function App() {
         Submit & Check
       </button>
 
+      <button
+        onClick={() => pickRandomQuestion()}
+        style={{ marginLeft: 10 }}
+      >
+        Next Question 🔄
+      </button>
+
       {result && (
         <>
           <hr />
-          <h3>Score: {result.total} / 6</h3>
+
+          <h3>
+            Score: {result.total} / 6{" "}
+            {result.total === 6 ? "✅" : "⚠️"}
+          </h3>
+
+          {result.error_types.length > 0 && (
+            <p>
+              <strong>Detected misconception:</strong>{" "}
+              {result.error_types.join(", ")}
+            </p>
+          )}
 
           <p>
             <strong>What you fixed:</strong>{" "}
@@ -68,4 +110,3 @@ export default function App() {
     </div>
   );
 }
-
