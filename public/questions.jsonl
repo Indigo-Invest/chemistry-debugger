@@ -1,0 +1,1 @@
+{"id":"thermo_001","domain":"Physical","difficulty":"Easy","title":"Thermodynamics vs Kinetics","prompt":"Why does a reaction with ΔG < 0 sometimes proceed slowly?","gold":"A negative ΔG indicates thermodynamic favorability, but reaction rate depends on activation energy.","flawed":"Because ΔG measures how fast a reaction occurs."}
